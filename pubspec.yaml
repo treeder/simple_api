@@ -1,8 +1,8 @@
 name: simple_api
 description: An api package that follows specific conventions.
 version: 0.0.1
-author:
-homepage:
+author: treeder
+homepage: https://github.com/treeder/simple_api
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http:
+  firebase_auth:
 
 dev_dependencies:
   flutter_test:
