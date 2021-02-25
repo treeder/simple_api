@@ -40,7 +40,7 @@ class SimpleAPI {
   // if fromJson is not defined, this will return a Map<String, dynamic>
   // rootPath will skip a level in json
   static Future call(String method, String url,
-      {dynamic body, Function fromJson, String rootPath, bool list}) async {
+      {dynamic body, Function? fromJson, String? rootPath, bool? list}) async {
     var req = http.Request(method, Uri.parse(url));
     req.headers.addAll(await headers());
     if (body != null) {
@@ -91,18 +91,18 @@ class SimpleAPI {
     return jsonmap;
   }
 
-  static Future<T> post<T>(String url,
-      {dynamic body, Function fromJson, String rootPath}) async {
+  static Future<T?> post<T>(String url,
+      {dynamic body, Function? fromJson, String? rootPath}) async {
     var ret = await call('POST', url,
         body: body, fromJson: fromJson, rootPath: rootPath);
     print("got response");
     print(ret.runtimeType);
     print(ret);
-    return ret as T;
+    return ret as T?;
   }
 
   static Future delete(String url,
-      {dynamic body, Function fromJson, String rootPath}) async {
+      {dynamic body, Function? fromJson, String? rootPath}) async {
     var ret = await call('DELETE', url,
         body: body, fromJson: fromJson, rootPath: rootPath);
     print("got delete response");
@@ -111,14 +111,14 @@ class SimpleAPI {
     return ret;
   }
 
-  static Future<T> get<T>(String url,
-      {dynamic body, Function fromJson, String rootPath}) async {
+  static Future<T?> get<T>(String url,
+      {dynamic body, Function? fromJson, String? rootPath}) async {
     return await call('GET', url,
-        body: body, fromJson: fromJson, rootPath: rootPath) as T;
+        body: body, fromJson: fromJson, rootPath: rootPath) as T?;
   }
 
-  static Future<List<T>> getList<T>(String url,
-      {dynamic body, Function fromJson, String rootPath}) async {
+  static Future<List<T>?> getList<T>(String url,
+      {dynamic body, Function? fromJson, String? rootPath}) async {
     var ret = await call('GET', url,
         body: body, fromJson: fromJson, rootPath: rootPath, list: true);
     print("got response getList");
