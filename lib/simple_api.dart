@@ -2,9 +2,7 @@ library simple_api;
 
 import 'dart:io';
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
-import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class APIError {
   int code;
@@ -21,17 +19,11 @@ class APIError {
 
 /// A Calculator.
 class SimpleAPI {
-  static Future<Map<String, String>> headers() async {
-    // auth.User user = Globals.currentUser();
-    var user = auth.FirebaseAuth.instance.currentUser;
+  static Map<String, String> headers({String bearer = ""}) {
     var h = {'Content-Type': 'application/json'};
-    if (user == null) {
-      // print("USER IS NULL! Should redirect here to login.");
-      // NavigationService.instance().navigateTo('/');
-      return h;
+    if (bearer != "") {
+      h[HttpHeaders.authorizationHeader] = "Bearer " + bearer;
     }
-    String idToken = await user.getIdToken();
-    h[HttpHeaders.authorizationHeader] = "Bearer " + idToken;
     return h;
   }
 
@@ -40,9 +32,13 @@ class SimpleAPI {
   // if fromJson is not defined, this will return a Map<String, dynamic>
   // rootPath will skip a level in json
   static Future call(String method, String url,
-      {dynamic body, Function? fromJson, String? rootPath, bool? list}) async {
+      {dynamic body,
+      Function? fromJson,
+      String? rootPath,
+      bool? list,
+      String bearer = ""}) async {
     var req = http.Request(method, Uri.parse(url));
-    req.headers.addAll(await headers());
+    req.headers.addAll(headers());
     if (body != null) {
       var x = jsonEncode(body);
       print("ENCODED");
@@ -92,9 +88,12 @@ class SimpleAPI {
   }
 
   static Future<T?> post<T>(String url,
-      {dynamic body, Function? fromJson, String? rootPath}) async {
+      {dynamic body,
+      Function? fromJson,
+      String? rootPath,
+      String bearer = ""}) async {
     var ret = await call('POST', url,
-        body: body, fromJson: fromJson, rootPath: rootPath);
+        body: body, fromJson: fromJson, rootPath: rootPath, bearer: bearer);
     print("got response");
     print(ret.runtimeType);
     print(ret);
@@ -102,9 +101,12 @@ class SimpleAPI {
   }
 
   static Future delete(String url,
-      {dynamic body, Function? fromJson, String? rootPath}) async {
+      {dynamic body,
+      Function? fromJson,
+      String? rootPath,
+      String bearer = ""}) async {
     var ret = await call('DELETE', url,
-        body: body, fromJson: fromJson, rootPath: rootPath);
+        body: body, fromJson: fromJson, rootPath: rootPath, bearer: bearer);
     print("got delete response");
     print(ret.runtimeType);
     print(ret);
@@ -112,15 +114,28 @@ class SimpleAPI {
   }
 
   static Future<T?> get<T>(String url,
-      {dynamic body, Function? fromJson, String? rootPath}) async {
+      {dynamic body,
+      Function? fromJson,
+      String? rootPath,
+      String bearer = ""}) async {
     return await call('GET', url,
-        body: body, fromJson: fromJson, rootPath: rootPath) as T?;
+        body: body,
+        fromJson: fromJson,
+        rootPath: rootPath,
+        bearer: bearer) as T?;
   }
 
   static Future<List<T>?> getList<T>(String url,
-      {dynamic body, Function? fromJson, String? rootPath}) async {
+      {dynamic body,
+      Function? fromJson,
+      String? rootPath,
+      String bearer = ""}) async {
     var ret = await call('GET', url,
-        body: body, fromJson: fromJson, rootPath: rootPath, list: true);
+        body: body,
+        fromJson: fromJson,
+        rootPath: rootPath,
+        list: true,
+        bearer: bearer);
     print("got response getList");
     print(ret.runtimeType);
     print(ret);
