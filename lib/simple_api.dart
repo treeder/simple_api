@@ -10,7 +10,7 @@ class APIError {
   APIError(this.message, this.code);
 
   String toString() {
-    if (code != null && code > 0) {
+    if (code > 0) {
       return "$code - $message";
     }
     return "$message";
@@ -19,10 +19,21 @@ class APIError {
 
 /// A Calculator.
 class SimpleAPI {
-  static Map<String, String> headers({String bearer = ""}) {
+  // set this to true to see response bodies and things
+  static bool debug = false;
+
+  static Future<Map<String, String>> headers({dynamic bearer = ""}) async {
     var h = {'Content-Type': 'application/json'};
-    if (bearer != "") {
-      h[HttpHeaders.authorizationHeader] = "Bearer " + bearer;
+    // print("bearer: $bearer");
+    if (bearer != null) {
+      if (bearer is Future) {
+        // print("is future");
+        var bearerF = bearer as Future<String>;
+        bearer = await bearerF;
+      }
+      if (bearer != "") {
+        h[HttpHeaders.authorizationHeader] = "Bearer " + bearer;
+      }
     }
     return h;
   }
@@ -36,13 +47,13 @@ class SimpleAPI {
       Function? fromJson,
       String? rootPath,
       bool? list,
-      String bearer = ""}) async {
+      dynamic bearer = ""}) async {
     var req = http.Request(method, Uri.parse(url));
-    req.headers.addAll(headers());
+    req.headers.addAll(await headers(bearer: bearer));
     if (body != null) {
       var x = jsonEncode(body);
-      print("ENCODED");
-      print(x);
+      // print("ENCODED");
+      // print(x);
       req.body = x;
     }
     http.Response response;
@@ -66,7 +77,7 @@ class SimpleAPI {
       // }
       // throw err;
     }
-    print('jsonmap: ' + response.body);
+    if (debug) print('jsonmap: ' + response.body);
     if (response.statusCode != 200) {
       // resp.error = ErrorResponse.fromJson(jsonmap['error']);
       // return resp;
@@ -80,65 +91,65 @@ class SimpleAPI {
       if (list ?? false) {
         return List.from(jsonmap.map((model) => fromJson(model)));
       }
-      print("about to fromJson");
+      // print("about to fromJson");
       return fromJson(jsonmap);
     }
 
     return jsonmap;
   }
 
-  static Future<T?> post<T>(String url,
+  static Future<T> post<T>(String url,
       {dynamic body,
       Function? fromJson,
       String? rootPath,
-      String bearer = ""}) async {
+      dynamic bearer = ""}) async {
     var ret = await call('POST', url,
         body: body, fromJson: fromJson, rootPath: rootPath, bearer: bearer);
-    print("got response");
-    print(ret.runtimeType);
-    print(ret);
-    return ret as T?;
+    // print("got response");
+    // print(ret.runtimeType);
+    // print(ret);
+    return ret as T;
   }
 
   static Future delete(String url,
       {dynamic body,
       Function? fromJson,
       String? rootPath,
-      String bearer = ""}) async {
+      dynamic bearer = ""}) async {
     var ret = await call('DELETE', url,
         body: body, fromJson: fromJson, rootPath: rootPath, bearer: bearer);
-    print("got delete response");
-    print(ret.runtimeType);
-    print(ret);
+    // print("got delete response");
+    // print(ret.runtimeType);
+    // print(ret);
     return ret;
   }
 
-  static Future<T?> get<T>(String url,
+  static Future<T> get<T>(String url,
       {dynamic body,
       Function? fromJson,
       String? rootPath,
-      String bearer = ""}) async {
+      dynamic bearer = ""}) async {
     return await call('GET', url,
         body: body,
         fromJson: fromJson,
         rootPath: rootPath,
-        bearer: bearer) as T?;
+        bearer: bearer) as T;
   }
 
-  static Future<List<T>?> getList<T>(String url,
+  static Future<List<T>> getList<T>(String url,
       {dynamic body,
       Function? fromJson,
       String? rootPath,
-      String bearer = ""}) async {
+      dynamic bearer = ""}) async {
     var ret = await call('GET', url,
         body: body,
         fromJson: fromJson,
         rootPath: rootPath,
         list: true,
         bearer: bearer);
-    print("got response getList");
-    print(ret.runtimeType);
-    print(ret);
+    // print("got response getList");
+    // print(ret.runtimeType);
+    // print(ret);
     return ret.cast<T>(); //as List<T>;
   }
 }
