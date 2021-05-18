@@ -22,8 +22,9 @@ class SimpleAPI {
   // set this to true to see response bodies and things
   static bool debug = false;
 
-  static Future<Map<String, String>> headers({dynamic bearer = ""}) async {
-    var h = {'Content-Type': 'application/json'};
+  static Future<Map<String, String>> defaultHeaders(
+      {dynamic bearer = ""}) async {
+    var h = {'Content-Type': 'application/json; charset=UTF-8'};
     // print("bearer: $bearer");
     if (bearer != null) {
       if (bearer is Future) {
@@ -47,14 +48,23 @@ class SimpleAPI {
       Function? fromJson,
       String? rootPath,
       bool? list,
-      dynamic bearer = ""}) async {
+      dynamic bearer = "",
+      Map<String, String>? headers}) async {
     var req = http.Request(method, Uri.parse(url));
-    req.headers.addAll(await headers(bearer: bearer));
+    var dh = await defaultHeaders(bearer: bearer);
+    if (headers != null) {
+      dh.addAll(headers);
+    }
+    req.headers.addAll(dh);
     if (body != null) {
-      var x = jsonEncode(body);
-      // print("ENCODED");
-      // print(x);
-      req.body = x;
+      if (body is String) {
+        req.body = body;
+      } else {
+        var x = jsonEncode(body);
+        // print("ENCODED");
+        // print(x);
+        req.body = x;
+      }
     }
     http.Response response;
     try {
@@ -102,9 +112,14 @@ class SimpleAPI {
       {dynamic body,
       Function? fromJson,
       String? rootPath,
-      dynamic bearer = ""}) async {
+      dynamic bearer = "",
+      Map<String, String>? headers}) async {
     var ret = await call('POST', url,
-        body: body, fromJson: fromJson, rootPath: rootPath, bearer: bearer);
+        body: body,
+        fromJson: fromJson,
+        rootPath: rootPath,
+        bearer: bearer,
+        headers: headers);
     // print("got response");
     // print(ret.runtimeType);
     // print(ret);
@@ -115,9 +130,14 @@ class SimpleAPI {
       {dynamic body,
       Function? fromJson,
       String? rootPath,
-      dynamic bearer = ""}) async {
+      dynamic bearer = "",
+      Map<String, String>? headers}) async {
     var ret = await call('DELETE', url,
-        body: body, fromJson: fromJson, rootPath: rootPath, bearer: bearer);
+        body: body,
+        fromJson: fromJson,
+        rootPath: rootPath,
+        bearer: bearer,
+        headers: headers);
     // print("got delete response");
     // print(ret.runtimeType);
     // print(ret);
@@ -128,25 +148,29 @@ class SimpleAPI {
       {dynamic body,
       Function? fromJson,
       String? rootPath,
-      dynamic bearer = ""}) async {
+      dynamic bearer = "",
+      Map<String, String>? headers}) async {
     return await call('GET', url,
         body: body,
         fromJson: fromJson,
         rootPath: rootPath,
-        bearer: bearer) as T;
+        bearer: bearer,
+        headers: headers) as T;
   }
 
   static Future<List<T>> getList<T>(String url,
       {dynamic body,
       Function? fromJson,
       String? rootPath,
-      dynamic bearer = ""}) async {
+      dynamic bearer = "",
+      Map<String, String>? headers}) async {
     var ret = await call('GET', url,
         body: body,
         fromJson: fromJson,
         rootPath: rootPath,
         list: true,
-        bearer: bearer);
+        bearer: bearer,
+        headers: headers);
     // print("got response getList");
     // print(ret.runtimeType);
     // print(ret);
