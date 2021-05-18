@@ -1,6 +1,6 @@
 name: simple_api
 description: An api package that follows specific conventions.
-version: 0.1.1
+version: 0.1.2
 homepage: https://github.com/treeder/simple_api
 
 environment:
