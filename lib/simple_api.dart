@@ -17,6 +17,10 @@ class APIError {
   }
 }
 
+class NotFound extends APIError {
+  NotFound({String message = 'not found'}) : super(message, 404);
+}
+
 /// A Calculator.
 class SimpleAPI {
   // set this to true to see response bodies and things
@@ -75,7 +79,7 @@ class SimpleAPI {
       throw "Error connecting to API: $err";
     }
     if (response.statusCode == 404) {
-      throw "404 not found";
+      throw NotFound();
     }
     var jsonmap;
     try {
